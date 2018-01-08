@@ -1,0 +1,18 @@
+目录结构:
+主目录:  ./
+主目录下子目录:
+		       main   : main.c 或main.cpp 主程序入口
+		       include  : 公共的头文件和公共的makefile.base
+		       lib    : 每个模块生成的.a静态库文件，供main 调用
+		       responser : responser 模块
+		       receiver : receiver模块
+		       sender : sender 模块
+		       logout : logout 模块
+
+每个子目录下(除了lib 和include) 的makefile 都引用了include 目录下的makefile.base
+文件。各个模块的makefile 写法除了引用的头文件不一样，其他基本
+一样，main模块的makefile 需要指定生成的target 还有需要加载的静态库
+和动态库。makefile.base 经过改写c 和c++ 都可以编译。
+
+这样每个模块的makefile 写法就变得非常简单。
+

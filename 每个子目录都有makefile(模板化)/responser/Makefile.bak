@@ -1,0 +1,8 @@
+TOPDIR=./..
+
+LIB=libResponser.a
+
+LIBPATH=$(TOPDIR)/lib
+CFLAGS= -I$(TOPDIR)/include/ -I./ -I./receiver/
+
+include $(TOPDIR)/include/Makefile.base

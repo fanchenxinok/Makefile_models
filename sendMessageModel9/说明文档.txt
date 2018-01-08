@@ -1,0 +1,8 @@
+messageModelLib为库目录，这个目录下make　就会生成一个so 动态库文件。
+这个.so 是提供给用户使用的。她是由该目录下的很多.a 静态库链接
+而成的。除了提供.so 库文件外还提供了一个sendMsgModel.h的头文件。
+
+main.cpp是用户自己的应用程序。mainApi.cpp是库提供的接口定义都封装到
+.so库里面了。
+
+本模板添加protocol buffer 消息解析机制的使用。

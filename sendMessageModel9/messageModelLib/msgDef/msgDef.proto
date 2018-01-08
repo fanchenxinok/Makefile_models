@@ -1,0 +1,18 @@
+//protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/addressbook.proto
+
+option optimize_for = LITE_RUNTIME;  //由于我们在MyMessage文件中定义选项optimize_for的值为LITE_RUNTIME，因此由该.proto文件生成的所有C++类的父类均为::google::protobuf::MessageLite，而非::google::protobuf::Message
+
+message baseInfo
+{
+	required string name = 1;
+	required uint32 age = 2;
+	required string sex = 3;
+}
+
+message student
+{
+	required baseInfo base_info = 1;
+	required uint32 student_id = 2;
+	optional string address = 3;
+	repeated baseInfo parents = 4;
+}

@@ -1,0 +1,87 @@
+###########  MakeFile.env  ##########
+# Top level pattern, include by Makefile of child directory
+# in which variable like TOPDIR, TARGET or LIB may be needed
+
+CC=gcc
+XX=g++
+
+MAKE=make
+
+AR=ar cr
+RM = -rm -rf
+
+CFLAGS+=-Wall -g
+
+### 查找当前目录下的子目录####
+dirs:=$(shell find . -maxdepth 1 -type d)
+dirs:=$(basename $(patsubst ./%,%,$(dirs)))
+dirs:=$(filter-out $(exclude_dirs),$(dirs))
+SUBDIRS := $(dirs)
+
+XX_SRCS=$(wildcard *.cpp)
+SRCS=$(wildcard *.c)
+
+XX_OBJS=$(XX_SRCS:%.cpp=%.o)
+OBJS+=$(SRCS:%.c=%.o)
+
+XX_DEPENDS=$(XX_SRCS:%.cpp=%.d)
+DEPENDS=$(SRCS:%.c=%.d)
+
+all:$(TARGET) $(XX_TARGET) $(LIB) subdirs
+
+$(LIB):$(XX_OBJS) $(OBJS)
+	$(AR)  $@  $^
+	cp $@ $(LIBPATH)
+
+#######如果不是main 所在的目录
+#######当target和xx_target都不存在的时候
+#ifeq ($(TARGET)$(XX_TARGET),)   
+#	for dir in $(SUBDIRS);\
+#		do $(MAKE) -C $$dir all||exit 1;\
+#	done
+#endif
+
+####编译目标文件前先编译子目录的文件#####
+$(TARGET):$(OBJS) subdirs	
+	$(CC) -o $@ $< $(LDFLAGS)
+	#cp $@ $(EXEPATH)
+
+$(XX_TARGET):$(XX_OBJS) subdirs
+	$(XX) -o $@ $< $(LDFLAGS)
+	#cp $@ $(EXEPATH)
+
+subdirs:$(SUBDIRS)
+	for dir in $(SUBDIRS);\
+		do $(MAKE) -C $$dir all||exit 1;\
+	done
+
+$(OBJS):%.o:%.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+	
+$(XX_OBJS):%.o:%.cpp
+	$(XX) -c $< -o $@ $(CFLAGS)
+
+-include $(DEPENDS)
+
+$(DEPENDS):%.d:%.c
+	set -e; rm -f $@; \
+	$(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[:]*,\1.o $@:,g' < $@.$$$$ > $@; \
+	rm $@.$$$$
+
+-include $(XX_DEPENDS)
+
+$(XX_DEPENDS):%.d:%.cpp
+	set -e; rm -f $@; \
+	$(XX) -MM $(CFLAGS) $< > $@.$$$$; \
+	sed 's,\($*\)\.o[:]*,\1.o $@:,g' < $@.$$$$ > $@; \
+	rm $@.$$$$
+	
+.PHONY : clean
+clean:
+	$(RM) mainApp lib/*.a
+	for dir in $(SUBDIRS);\
+		do $(MAKE) -C $$dir clean||exit 1;\
+	done
+	$(RM) $(TARGET) $(LIB)  $(OBJS) $(DEPENDS) \
+			$(XX_TARGET) $(XX_OBJS) $(XX_DEPENDS)
